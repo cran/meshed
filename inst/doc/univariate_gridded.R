@@ -61,8 +61,8 @@ simdata %>% ggplot(aes(Var1, Var2, fill=y)) +
   theme_minimal() + ggtitle("y: Observed outcomes")
 
 ## -----------------------------------------------------------------------------
-mcmc_keep <- 1000
-mcmc_burn <- 1000
+mcmc_keep <- 200 # too small! this is just a vignette.
+mcmc_burn <- 400
 mcmc_thin <- 2
 
 mesh_total_time <- system.time({
@@ -70,7 +70,7 @@ mesh_total_time <- system.time({
                       #axis_partition=c(10,10), #same as block_size=25
                       block_size = 25,
                       n_samples = mcmc_keep, n_burn = mcmc_burn, n_thin = mcmc_thin, 
-                      n_threads = 4,
+                      n_threads = 2,
                       verbose = 0,
                       prior=list(phi=c(1,30))
   )})

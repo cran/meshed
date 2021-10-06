@@ -15,6 +15,7 @@ arma::vec NodeData::gradient_logfullcondit(const arma::vec& x){
 
 NodeDataW::NodeDataW(){
   n=-1;
+  fgrid = false;
 }
 
 NodeDataW::NodeDataW(const arma::mat& y_all, //const arma::mat& Z_in,
@@ -340,7 +341,7 @@ double NodeDataW::logfullcondit(const arma::mat& x){
   
   // GP prior
   double logprior = fwdcond_dmvn(x, Ri, Kcxpar);
-  for(int c=0; c<num_children; c++ ){
+  for(unsigned int c=0; c<num_children; c++ ){
     logprior += bwdcond_dmvn(x, c);
     
   }

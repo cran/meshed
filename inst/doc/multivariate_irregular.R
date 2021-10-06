@@ -14,7 +14,7 @@ library(meshed)
 
 set.seed(2021)
 
-SS <- 30 # coord values for jth dimension 
+SS <- 25 # coord values for jth dimension 
 dd <- 2 # spatial dimension
 n <- SS^2 # number of locations
 q <- 3 # number of outcomes
@@ -76,18 +76,18 @@ simdata %>%
   theme_minimal() + theme(legend.position="none")
 
 ## -----------------------------------------------------------------------------
-mcmc_keep <- 500
-mcmc_burn <- 500
+mcmc_keep <- 200 # too small! this is just a vignette.
+mcmc_burn <- 400
 mcmc_thin <- 2
 
 mesh_total_time <- system.time({
   meshout <- spmeshed(y=YY, x=XX, coords=coords, k = 2,
-                    grid_size = c(30, 30),
-                    block_size = 20,
+                    grid_size = c(20, 20), 
+                    block_size = 16, 
                     n_samples = mcmc_keep, 
                     n_burn = mcmc_burn, 
                     n_thin = mcmc_thin, 
-                    n_threads = 4,
+                    n_threads = 2,
                     prior = list(phi=c(2, 20)),
                     verbose=0
   )})

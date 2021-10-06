@@ -13,7 +13,7 @@ library(ggplot2)
 library(meshed)
 set.seed(2021)
 
-SS <- 50 # coord values for jth dimension 
+SS <- 30 # coord values for jth dimension 
 dd <- 2 # spatial dimension
 n <- SS^2 # number of locations
 p <- 3 # number of covariates
@@ -61,15 +61,15 @@ simdata %>% ggplot(aes(Var1, Var2, color=y)) +
   theme_minimal() + ggtitle("y: Observed outcomes")
 
 ## -----------------------------------------------------------------------------
-mcmc_keep <- 500
-mcmc_burn <- 500
+mcmc_keep <- 200 # too small! this is just a vignette.
+mcmc_burn <- 400
 mcmc_thin <- 2
 
 mesh1_total_time <- system.time({
   meshout1 <- spmeshed(y, X, coords,
-                      block_size = 25,
+                      block_size = 25, 
                       n_samples = mcmc_keep, n_burn = mcmc_burn, n_thin = mcmc_thin, 
-                      n_threads = 4,
+                      n_threads = 2,
                       verbose = 0,
                       settings=list(forced_grid=FALSE, cache=FALSE),
                       prior=list(phi=c(1,30))
@@ -78,10 +78,10 @@ mesh1_total_time <- system.time({
 ## -----------------------------------------------------------------------------
 mesh2_total_time <- system.time({
   meshout2 <- spmeshed(y, X, coords,
-                      grid_size = c(50, 50),
+                      grid_size = c(30, 30),
                       block_size = 25,
                       n_samples = mcmc_keep, n_burn = mcmc_burn, n_thin = mcmc_thin, 
-                      n_threads = 4,
+                      n_threads = 2,
                       verbose = 0,
                       prior=list(phi=c(1,30))
   )})

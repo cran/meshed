@@ -13,7 +13,7 @@ library(ggplot2)
 library(meshed)
 set.seed(2021)
 
-SS <- 50 # coord values for jth dimension 
+SS <- 30 # coord values for jth dimension 
 dd <- 2 # spatial dimension
 n <- SS^2 # number of locations
 p <- 3 # number of covariates
@@ -23,7 +23,6 @@ coords <- cbind(runif(n), runif(n))
 colnames(coords) <- c("Var1", "Var2")
 
 sigmasq <- 1.5
-nu <- 0.5
 phi <- 10
 
 # covariance at coordinates
@@ -59,17 +58,17 @@ simdata %>% ggplot(aes(Var1, Var2, color=y)) +
   theme_minimal() + ggtitle("y: Observed outcomes")
 
 ## -----------------------------------------------------------------------------
-mcmc_keep <- 1000
-mcmc_burn <- 1000
-mcmc_thin <- 1
+mcmc_keep <- 200 # too small! this is just a vignette.
+mcmc_burn <- 400
+mcmc_thin <- 2
 
 mesh_total_time <- system.time({
   meshout <- spmeshed(y, X, coords,
                       family="poisson",
-                      grid_size=c(40, 40),
+                      grid_size=c(20, 20),
                       block_size = 20,
                       n_samples = mcmc_keep, n_burn = mcmc_burn, n_thin = mcmc_thin, 
-                      n_threads = 4,
+                      n_threads = 2,
                       verbose = 0,
                       prior=list(phi=c(1,30))
   )})
