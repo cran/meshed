@@ -218,9 +218,9 @@ void NodeDataW::mvn_dens_grad_neghess(double& xtarget, arma::vec& gradient, arma
 
 
 arma::vec NodeDataW::compute_dens_and_grad(double& xtarget, const arma::mat& x){
-  int nr = y.n_rows;
-  int q = y.n_cols;
-  int k = x.n_cols;
+  unsigned int nr = y.n_rows;
+  unsigned int q = y.n_cols;
+  unsigned int k = x.n_cols;
   
   arma::vec grad_loglike = arma::zeros(x.n_rows * x.n_cols);
   
@@ -239,7 +239,7 @@ arma::vec NodeDataW::compute_dens_and_grad(double& xtarget, const arma::mat& x){
     if(fgrid){
       LambdaH = arma::zeros(q, k*indxsize);
     }
-    for(int j=0; j<q; j++){
+    for(unsigned int j=0; j<q; j++){
       if(na_mat(i, j) > 0){
         
         double xij = arma::conv_to<double>::from(Lambda_lmc.row(j) * wloc.t());
@@ -259,7 +259,7 @@ arma::vec NodeDataW::compute_dens_and_grad(double& xtarget, const arma::mat& x){
         } else {
           arma::mat LambdaHt = Lambda_lmc.row(j).t();
           arma::vec Lgrad = LambdaHt * gradloc;
-          for(int s1=0; s1<k; s1++){
+          for(unsigned int s1=0; s1<k; s1++){
             grad_loglike(s1 * indxsize + i) += Lgrad(s1);   
           }  
           
@@ -319,6 +319,31 @@ double NodeDataW::logfullcondit(const arma::mat& x){
     
   }
   return ( loglike + logprior );
+}
+
+// log posterior 
+double NodeDataW::loglike(const arma::mat& x){
+  double loglike = 0;
+  
+  for(unsigned int i=0; i<y.n_rows; i++){
+    arma::mat wloc;
+    if(fgrid){
+      wloc = arma::sum(arma::trans((*Hproject).slice(i) % arma::trans(x)), 0);
+    } else {
+      wloc = x.row(i);
+    }
+    for(unsigned int j=0; j<y.n_cols; j++){
+      //Rcpp::Rcout << i << " - " << j << endl;
+      if(na_mat(i, j) > 0){
+        double xij = arma::conv_to<double>::from(Lambda_lmc.row(j) * wloc.t());
+        double ystarij = family(j) == 3? ystar(i, j) : 0;
+        arma::vec gradloc = get_likdens_likgrad(loglike, y(i,j), ystarij, tausq(j), 
+                                                offset(i, j), xij, family(j), false);
+      }
+    }
+  }
+  
+  return ( loglike );
 }
 
 // Gradient of the log posterior
@@ -587,6 +612,25 @@ arma::mat NodeDataW::neghess_logfullcondit(const arma::mat& x){
     //neghess_logprior_chi;
 }
 
+
+// Neghess of the log cond prior
+arma::mat NodeDataW::neghess_prior(const arma::mat& x){
+  
+  arma::mat neghess_logtarg = arma::zeros(x.n_rows * x.n_cols,
+                                          x.n_rows * x.n_cols);
+  
+  neghess_fwdcond_dmvn(neghess_logtarg, x);
+  
+  //arma::mat neghess_logprior_chi = arma::zeros(arma::size(neghess_logprior_par));
+  for(unsigned int c=0; c<num_children; c++ ){
+    // adds to neghess_logprior_par
+    neghess_bwdcond_dmvn(neghess_logtarg, x, c);
+  }
+  
+  return neghess_logtarg;// + 
+  //neghess_logprior_par; // + 
+  //neghess_logprior_chi;
+}
 
 
 NodeDataB::NodeDataB(){
